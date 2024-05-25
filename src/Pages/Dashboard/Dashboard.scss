@@ -1,0 +1,9 @@
+@import '../../Assets/Styles/Global.Style.scss';
+
+.chart-holder {
+    border: 1px solid $myBorderColor;
+    border-radius: $myBorderRadiousSm;
+    padding: 15px;
+    box-shadow: 2px 2px 7px $myBoxShadowColor;
+    background-color: $myChartBgColor;
+}

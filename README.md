@@ -1,3 +1,7 @@
+https://preview.keenthemes.com/keen/demo1/dashboards/ecommerce.html
+https://themeforest.net/search/ecommerce%20admin%20dashboard
+https://colorlib.com/wp/free-html5-admin-dashboard-templates/
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
