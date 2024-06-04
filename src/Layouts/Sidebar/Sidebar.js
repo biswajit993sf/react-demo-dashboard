@@ -2,7 +2,7 @@ import * as React from 'react';
 import './Sidebar.scss';
 import Header from '../Header/Header';
 import Breadcrumb from '../../Components/Breadcrumb/Breadcrumb';
-import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import AppBar from '@mui/material/AppBar';
@@ -28,15 +28,16 @@ import Google from '../../Pages/Google/Google';
 import Login from '../../Pages/Login/Login';
 import Website from '../../Pages/Website/Website';
 
-const DashboardPage = () => <div><Dashboard /></div>;
-const FlipkartPage = () => <div><Flipkart /></div>;
-const GooglePage = () => <div><Google /></div>;
-const LoginPage = () => <div><Login /></div>;
-const WebsitePage = () => <div><Website /></div>;
+const DashboardPage = () => <Dashboard />;
+const FlipkartPage = () => <Flipkart />;
+const GooglePage = () => <Google />;
+const LoginPage = () => <Login />;
+const WebsitePage = () => <Website />;
 
 const drawerWidth = 240;
 
 function Sidebar() {
+    const location = useLocation();
     const routes = [
         { path: '/', name: 'Dashboard', element: <DashboardPage />, exact: true, icon: <DashboardOutlinedIcon /> },
         {
@@ -50,6 +51,11 @@ function Sidebar() {
         { path: '/website', name: 'Website', element: <WebsitePage />, icon: <LanguageOutlinedIcon /> },
     ];
 
+    const isSubmenuVisible = (route) => {
+        if (!route.hasSubmenu) return false;
+        return route.submenu.some(subRoute => location.pathname.startsWith(subRoute.path)) || location.pathname === route.path;
+    };
+
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
@@ -57,24 +63,45 @@ function Sidebar() {
                 <Header />
             </AppBar>
 
-            <Router>
-                <Drawer
-                    variant="permanent"
-                    sx={{
-                        width: drawerWidth,
-                        flexShrink: 0,
-                        [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
-                    }}
-                >
-                    <Toolbar />
-                    <Box sx={{ overflow: 'auto' }}>
-                        <List>
-                            {routes.map((route, index) => (
-                                <React.Fragment key={route.name}>
-                                    <ListItem disablePadding>
+            <Drawer
+                variant="permanent"
+                sx={{
+                    width: drawerWidth,
+                    flexShrink: 0,
+                    [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+                }}
+            >
+                <Toolbar />
+                <Box sx={{ overflow: 'auto' }}>
+                    <List>
+                        {routes.map((route, index) => (
+                            <React.Fragment key={route.name}>
+                                <ListItem disablePadding>
+                                    <ListItemButton
+                                        component={NavLink}
+                                        to={route.path}
+                                        sx={{
+                                            '&.active': {
+                                                backgroundColor: 'rgb(66 93 120 / 54%)',
+                                                color: '#fff',
+                                                '& .MuiListItemIcon-root': {
+                                                    color: '#fff',
+                                                },
+                                            },
+                                            color: '#b0b0b0',
+                                        }}
+                                    >
+                                        <ListItemIcon>
+                                            {route.icon}
+                                        </ListItemIcon>
+                                        <ListItemText primary={route.name} />
+                                    </ListItemButton>
+                                </ListItem>
+                                {isSubmenuVisible(route) && route.submenu.map((subRoute) => (
+                                    <ListItem key={subRoute.name} disablePadding sx={{ pl: 4 }}>
                                         <ListItemButton
                                             component={NavLink}
-                                            to={route.path}
+                                            to={subRoute.path}
                                             sx={{
                                                 '&.active': {
                                                     backgroundColor: 'rgb(66 93 120 / 54%)',
@@ -87,56 +114,39 @@ function Sidebar() {
                                             }}
                                         >
                                             <ListItemIcon>
-                                                {route.icon}
+                                                <SubdirectoryArrowRightIcon />
                                             </ListItemIcon>
-                                            <ListItemText primary={route.name} />
+                                            <ListItemText primary={subRoute.name} />
                                         </ListItemButton>
                                     </ListItem>
-                                    {route.hasSubmenu && route.submenu.map((subRoute) => (
-                                        <ListItem key={subRoute.name} disablePadding sx={{ pl: 4 }}>
-                                            <ListItemButton
-                                                component={NavLink}
-                                                to={subRoute.path}
-                                                sx={{
-                                                    '&.active': {
-                                                        backgroundColor: 'rgb(66 93 120 / 54%)',
-                                                        color: '#fff',
-                                                        '& .MuiListItemIcon-root': {
-                                                            color: '#fff',
-                                                        },
-                                                    },
-                                                    color: '#b0b0b0',
-                                                }}
-                                            >
-                                                <ListItemIcon>
-                                                    <SubdirectoryArrowRightIcon />
-                                                </ListItemIcon>
-                                                <ListItemText primary={subRoute.name} />
-                                            </ListItemButton>
-                                        </ListItem>
-                                    ))}
-                                </React.Fragment>
-                            ))}
-                        </List>
-                    </Box>
-                </Drawer>
-                <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                    <Toolbar />
-                    <Breadcrumb />
-                    <Routes>
-                        {routes.map((route) => (
-                            <Route key={route.name} path={route.path} element={route.element} exact={route.exact} />
+                                ))}
+                            </React.Fragment>
                         ))}
-                        {routes.filter(route => route.hasSubmenu).flatMap(route =>
-                            route.submenu.map(subRoute => (
-                                <Route key={subRoute.name} path={subRoute.path} element={subRoute.element} />
-                            ))
-                        )}
-                    </Routes>
+                    </List>
                 </Box>
-            </Router>
+            </Drawer>
+            <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+                <Toolbar />
+                <Breadcrumb />
+                <Routes>
+                    {routes.map((route) => (
+                        <Route key={route.name} path={route.path} element={route.element} exact={route.exact} />
+                    ))}
+                    {routes.filter(route => route.hasSubmenu).flatMap(route =>
+                        route.submenu.map(subRoute => (
+                            <Route key={subRoute.name} path={subRoute.path} element={subRoute.element} />
+                        ))
+                    )}
+                </Routes>
+            </Box>
         </Box>
     );
 }
 
-export default Sidebar;
+export default function App() {
+    return (
+        <Router>
+            <Sidebar />
+        </Router>
+    );
+}
